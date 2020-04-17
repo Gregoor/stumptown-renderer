@@ -12,7 +12,7 @@ function buildCompatibilityObject(query, compatibilityData) {
     // data and set a flag so that we do not render a `Link` for it since we
     // are already on that page.
     const name = query.split(".").pop();
-    features[name] = { ...compatibilityData.__compat, ...{ isFirst: true } };
+    features[name] = { ...compatibilityData.__compat, isFirst: true };
   }
   for (const compat in compatibilityData) {
     if (compat !== "__compat" && !!compatibilityData[compat]["__compat"]) {
@@ -43,24 +43,20 @@ function getIndexNoteForBrowserDetail(indexNotes, browserDetailIndex) {
   );
 }
 
-function computeDistinctKey(detail) {
-  return `${detail.browser}:${detail.version_added}`;
-}
-
-function RenderBrowserSupportDetails({
+function BrowserSupportDetails({
   browserSupportDetails,
   rowIndex,
   indexNotes,
   currentNoteId,
   onNotesClick,
 }) {
-  return browserSupportDetails.map((browserSupportDetail, detailIndex) => (
+  return browserSupportDetails.map((detail, detailIndex) => (
     <BrowserSupportDetail
-      key={computeDistinctKey(browserSupportDetail)}
+      key={detailIndex}
       index={`${rowIndex}-${detailIndex}`}
-      browser={browserSupportDetail.browser}
-      support={browserSupportDetail.support}
-      versionAdded={browserSupportDetail.version_added}
+      browser={detail.browser}
+      support={detail.support}
+      versionAdded={detail.version_added}
       currentNoteId={currentNoteId}
       onNotesClick={onNotesClick}
       indexNote={getIndexNoteForBrowserDetail(
@@ -71,34 +67,24 @@ function RenderBrowserSupportDetails({
   ));
 }
 
-function buildIndexNotes(
-  browserSupportDetails,
-  rowIndex,
-  currentNoteId,
-  hasFlag,
-  hasPrefix,
-  hasAlternative,
-  hasNotes
-) {
-  const indexNotes = browserSupportDetails.map(
-    (browserSupportDetail, detailIndex) => {
-      const support = browserSupportDetail.support;
-
+function buildIndexNotes(browserSupportDetails, rowIndex, currentNoteId) {
+  return browserSupportDetails
+    .filter(
+      (indexNotes, detailIndex) =>
+        `bc-history-${rowIndex}-${detailIndex}` === currentNoteId
+    )
+    .map(({ browser, support, version_added }) => {
       if (Array.isArray(support)) {
         const [notes, flags, prefixes, alternatives] = [[], [], [], []];
 
         for (const supportItem of support) {
-          if (!!supportItem.alternative_name) {
-            hasAlternative = true;
+          if (supportItem.alternative_name) {
             alternatives.push(supportItem);
-          } else if (!!supportItem.prefix) {
-            hasPrefix = true;
+          } else if (supportItem.prefix) {
             prefixes.push(supportItem);
           } else if (Array.isArray(supportItem.flags)) {
-            hasFlag = true;
             flags.concat(supportItem.flags);
-          } else if (!!supportItem.notes) {
-            hasNotes = true;
+          } else if (supportItem.notes) {
             if (Array.isArray(supportItem.notes)) {
               notes.concat(supportItem.notes);
             } else {
@@ -108,37 +94,8 @@ function buildIndexNotes(
         }
 
         return {
-          index: `${rowIndex}-${detailIndex}`,
-          browser: browserSupportDetail.browser,
-          version_added: browserSupportDetail.version_added,
-          support,
-          prefixes,
-          alternatives,
-          flags,
-          notes,
-        };
-      } else {
-        if (!hasFlag) {
-          hasFlag = !!(support && support.flags);
-        }
-        if (!hasPrefix) {
-          hasPrefix = !!(support && support.prefix);
-        }
-        if (!hasNotes) {
-          hasNotes = !!(support && support.notes);
-        }
-
-        const prefixes = !!(support && support.prefix) ? [support] : [];
-        const alternatives = !!(support && support.alternative_name)
-          ? [support]
-          : [];
-        const flags = !!(support && support.flags) ? support.flags : [];
-        const notes = gatherNotesForIndexNote(support);
-
-        return {
-          index: `${rowIndex}-${detailIndex}`,
-          browser: browserSupportDetail.browser,
-          version_added: browserSupportDetail.version_added,
+          browser,
+          version_added,
           support,
           prefixes,
           alternatives,
@@ -146,14 +103,17 @@ function buildIndexNotes(
           notes,
         };
       }
-    }
-  );
 
-  const filteredIndexNotes = indexNotes.filter(
-    (indexNotes) => `bc-history-${indexNotes.index}` === currentNoteId
-  );
-
-  return [filteredIndexNotes, hasFlag, hasPrefix, hasAlternative, hasNotes];
+      return {
+        browser,
+        version_added,
+        support,
+        prefixes: !!(support && support.prefix) ? [support] : [],
+        alternatives: !!(support && support.alternative_name) ? [support] : [],
+        flags: !!(support && support.flags) ? support.flags : [],
+        notes: gatherNotesForIndexNote(support),
+      };
+    });
 }
 
 // Find notes inside a support object and return as an array
@@ -174,140 +134,93 @@ export function Rows({
   displayBrowsers,
   onNotesClick,
   currentNoteId,
-  setLegendIcons,
 }) {
-  let [
-    hasDeprecation,
-    hasExperimental,
-    hasNonStandard,
-    hasFlag,
-    hasPrefix,
-    hasAlternative,
-    hasNotes,
-  ] = [false, false, false, false, false, false, false];
-  let indexNotes;
   const compatibility = buildCompatibilityObject(
     compatibilityData.query,
     compatibilityData.data
   );
-  const browserCompatibilityRows = [];
-
-  for (const key in compatibility) {
-    const currentRow = compatibility[key];
-
-    if (currentRow.status) {
-      if (!hasDeprecation) {
-        hasDeprecation = !!currentRow.status.deprecated;
-      }
-      if (!hasExperimental) {
-        hasExperimental = !!currentRow.status.experimental;
-      }
-      if (!hasNonStandard) {
-        hasNonStandard = !!currentRow.status.standard_track;
-      }
-    }
-
+  return Object.entries(compatibility).map(([key, row]) => {
     const browserSupportDetails = displayBrowsers.map((browser) => {
-      const support = currentRow.support[browser];
+      const support = row.support[browser];
       const version_added = getVersionAdded(support);
       return { browser, support, version_added };
     });
-
-    [
-      indexNotes,
-      hasFlag,
-      hasPrefix,
-      hasAlternative,
-      hasNotes,
-    ] = buildIndexNotes(
+    const indexNotes = buildIndexNotes(
       browserSupportDetails,
       key,
-      currentNoteId,
-      hasFlag,
-      hasPrefix,
-      hasAlternative,
-      hasNotes
+      currentNoteId
     );
-    browserCompatibilityRows.push([
-      <tr key={key}>
-        <th scope="row">
-          {currentRow.mdn_url && !currentRow.isFirst ? (
-            <Link to={currentRow.mdn_url}>
+    return (
+      <React.Fragment key={key}>
+        <tr>
+          <th scope="row">
+            {row.mdn_url && !row.isFirst ? (
+              <Link to={row.mdn_url}>
+                <code>{key}</code>
+              </Link>
+            ) : (
               <code>{key}</code>
-            </Link>
-          ) : (
-            <code>{key}</code>
-          )}
-          {currentRow.status && (
-            <div className="bc-icons">
-              {currentRow.status.deprecated && (
-                <abbr
-                  className="only-icon"
-                  title="Deprecated. Not for use in new websites."
-                >
-                  <span>Deprecated</span>
-                  <i className="ic-deprecated" />
-                </abbr>
-              )}
-              {!currentRow.status.standard_track && (
-                <abbr
-                  className="only-icon"
-                  title="Non-standard. Expect poor cross-browser support."
-                >
-                  <span>Non-standard</span>
-                  <i className="ic-non-standard" />
-                </abbr>
-              )}
-              {currentRow.status.experimental && (
-                <abbr
-                  className="only-icon"
-                  title="Experimental. Expect behavior to change in the future."
-                >
-                  <span>Experimental</span>
-                  <i className="ic-experimental" />
-                </abbr>
-              )}
-            </div>
-          )}
-        </th>
-        <RenderBrowserSupportDetails
-          browserSupportDetails={browserSupportDetails}
-          rowIndex={key}
-          indexNotes={indexNotes}
-          currentNoteId={currentNoteId}
-          onNotesClick={onNotesClick}
-        />
-      </tr>,
-      ...indexNotes.map((indexNote) => (
-        <tr
-          key={`notes-${indexNote.index}`}
-          id={`bc-history-${indexNote.index}`}
-          className="bc-history"
-          aria-hidden="false"
-        >
-          <th scope="row" />
-          <td colSpan={browserSupportDetails.length}>
-            <dl>
-              <BrowserSupportNotes
-                key={`notes-detail-${indexNote.index}`}
-                indexNote={indexNote}
-                blockElementTag="dt"
-                noteElementTag="dd"
-              />
-            </dl>
-          </td>
+            )}
+            {row.status && (
+              <div className="bc-icons">
+                {row.status.deprecated && (
+                  <abbr
+                    className="only-icon"
+                    title="Deprecated. Not for use in new websites."
+                  >
+                    <span>Deprecated</span>
+                    <i className="ic-deprecated" />
+                  </abbr>
+                )}
+                {!row.status.standard_track && (
+                  <abbr
+                    className="only-icon"
+                    title="Non-standard. Expect poor cross-browser support."
+                  >
+                    <span>Non-standard</span>
+                    <i className="ic-non-standard" />
+                  </abbr>
+                )}
+                {row.status.experimental && (
+                  <abbr
+                    className="only-icon"
+                    title="Experimental. Expect behavior to change in the future."
+                  >
+                    <span>Experimental</span>
+                    <i className="ic-experimental" />
+                  </abbr>
+                )}
+              </div>
+            )}
+          </th>
+          <BrowserSupportDetails
+            browserSupportDetails={browserSupportDetails}
+            rowIndex={key}
+            indexNotes={indexNotes}
+            currentNoteId={currentNoteId}
+            onNotesClick={onNotesClick}
+          />
         </tr>
-      )),
-    ]);
-  }
-  setLegendIcons(
-    hasDeprecation,
-    hasExperimental,
-    hasNonStandard,
-    hasFlag,
-    hasPrefix,
-    hasAlternative,
-    hasNotes
-  );
-  return browserCompatibilityRows;
+        {indexNotes.map((indexNote) => (
+          <tr
+            key={`notes-${indexNote.index}`}
+            id={`bc-history-${indexNote.index}`}
+            className="bc-history"
+            aria-hidden="false"
+          >
+            <th scope="row" />
+            <td colSpan={browserSupportDetails.length}>
+              <dl>
+                <BrowserSupportNotes
+                  indexNote={indexNote}
+                  blockElementTag="dt"
+                  noteElementTag="dd"
+                />
+              </dl>
+            </td>
+          </tr>
+        ))}
+      </React.Fragment>
+    );
+  });
 }

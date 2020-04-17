@@ -71,7 +71,6 @@ export function VersionBlock({
       className: `bc-browser-${browser} bc-supports-${isSupported} ${
         elementTag === "dt" ? "bc-supports" : ""
       }`,
-      key: `${browser}-compat`,
       onClick:
         (hasChildren &&
           (() => {
@@ -82,27 +81,23 @@ export function VersionBlock({
       "aria-controls": hasChildren ? `${index}` : null,
       tabIndex: hasChildren ? 0 : null,
     },
-    [
-      elementTag === "td" && (
-        <span key={`${browser}-name`} className="bc-browser-name">
+    <>
+      {elementTag === "td" && (
+        <span className="bc-browser-name">
           <BrowserName browserNameKey={browser} />
         </span>
-      ),
-      <abbr
-        key={`${browser}-support`}
-        className={`bc-level-${isSupported} only-icon`}
-        title={bcSupport}
-      >
+      )}
+      <abbr className={`bc-level-${isSupported} only-icon`} title={bcSupport}>
         <span>{bcSupport}</span>
-      </abbr>,
-      <span key={`${browser}-content`}>{textContent}</span>,
-      <div key={`${browser}-icons`} className="bc-icons">
+      </abbr>
+      <span>{textContent}</span>
+      <div className="bc-icons">
         <abbr className="only-icon" title={`${bcIconTitle}`}>
           <span>Notes</span>
           <i className={`${bcIcon}`} />
         </abbr>
-      </div>,
-      children,
-    ]
+      </div>
+      {children}
+    </>
   );
 }

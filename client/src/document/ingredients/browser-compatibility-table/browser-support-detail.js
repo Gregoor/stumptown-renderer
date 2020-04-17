@@ -63,7 +63,6 @@ export function BrowserSupportDetail({
       {indexNote && (
         <div className="bc-notes">
           <BrowserSupportNotes
-            key={`${indexNote.index}`}
             indexNote={indexNote}
             blockElementTag="div"
             noteElementTag="div"

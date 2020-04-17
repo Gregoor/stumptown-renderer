@@ -2,7 +2,7 @@ import React from "react";
 import { VersionBlock } from "./version-block";
 
 export function BrowserSupportNote({
-  indexNote,
+  browser,
   versionAdded,
   versionRemoved,
   noteContent,
@@ -12,41 +12,24 @@ export function BrowserSupportNote({
   displayBlock,
   displayNote,
 }) {
-  const note = [];
-  if (displayBlock) {
-    note.push(
-      <VersionBlock
-        key="block"
-        icon={noteType}
-        browser={indexNote.browser}
-        versionAdded={versionAdded}
-        versionRemoved={versionRemoved}
-        elementTag={blockElementTag}
-      />
-    );
-  }
-  if (displayNote) {
-    note.push(
-      React.createElement(
+  return (
+    <>
+      {displayBlock && (
+        <VersionBlock
+          icon={noteType}
+          browser={browser}
+          versionAdded={versionAdded}
+          versionRemoved={versionRemoved}
+          elementTag={blockElementTag}
+        />
+      )}
+      {React.createElement(
         noteElementTag,
         {
-          key: `note-${indexNote.index}`,
           className: "padded-note",
         },
-        noteContent
-      )
-    );
-  } else {
-    note.push(
-      React.createElement(
-        noteElementTag,
-        {
-          key: `note-${indexNote.index}`,
-          className: "padded-note",
-        },
-        <span />
-      )
-    );
-  }
-  return note;
+        displayNote ? noteContent : <span />
+      )}
+    </>
+  );
 }
