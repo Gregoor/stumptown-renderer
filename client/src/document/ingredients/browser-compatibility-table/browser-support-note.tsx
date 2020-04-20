@@ -2,7 +2,7 @@ import React from "react";
 import { VersionBlock } from "./version-block";
 
 export function BrowserSupportNote({
-  browser,
+  indexNote,
   versionAdded,
   versionRemoved,
   noteContent,
@@ -26,6 +26,7 @@ export function BrowserSupportNote({
       {React.createElement(
         noteElementTag,
         {
+          key: `note-${indexNote.index}`,
           className: "padded-note",
         },
         displayNote ? noteContent : <span />

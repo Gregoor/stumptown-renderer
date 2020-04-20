@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React from "react";
 import { Router, Link } from "@reach/router";
 
@@ -23,7 +24,7 @@ export function App(appProps) {
   );
 }
 
-function Header({ location }) {
+function Header({ location }: any) {
   return (
     <header>
       <h1>
