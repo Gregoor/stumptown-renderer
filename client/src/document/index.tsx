@@ -266,7 +266,7 @@ function RenderDocumentBody({ doc }) {
       return (
         <BrowserCompatibilityTable
           key={`browser_compatibility${i}`}
-          data={section.value}
+          {...section.value}
         />
       );
     } else if (section.type === "examples") {
