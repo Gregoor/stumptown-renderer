@@ -1,10 +1,8 @@
 const serverExports = {};
 if (JSON.parse(process.env.TESTING_START_SERVER || "false")) {
   serverExports.server = {
-    // This is the .env file here inside the 'testing/' directory.
-    // This is needed so that the server that gets started get the right
-    // environment variables specifically for the functional test suite.
-    command: "ENV_FILE=.env node ../server/index.js",
+    command:
+      "cd .. && ENV_FILE=testing/.env yarn workspace server start:no-watch",
     port: 5000,
     host: "localhost",
     debug: true, // XXX Note sure that the harm is of having this on

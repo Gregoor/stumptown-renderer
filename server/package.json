@@ -4,6 +4,7 @@
   "main": "index.js",
   "license": "MPL-2.0",
   "scripts": {
+    "start:no-watch": "node index.js",
     "start": "nodemon index.js --watch . --watch ../build --watch ../content --watch ../kumascript"
   },
   "dependencies": {
