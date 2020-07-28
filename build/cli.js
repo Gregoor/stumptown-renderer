@@ -9,7 +9,8 @@ const { renderHTML } = require("ssr");
 const options = require("./build-options");
 const { buildDocument } = require("./index");
 const SearchIndex = require("./search-index");
-const { BUILD_OUT_ROOT } = require("./constants");
+
+const BUILD_OUT_ROOT = path.join(__dirname, "..", "client", "build");
 
 function makeSitemapXML(locale, slugs) {
   const wikiHistory = JSON.parse(
@@ -45,6 +46,8 @@ async function buildDocuments() {
 
   const slugPerLocale = {};
   const searchIndex = new SearchIndex();
+
+  console.log(options);
 
   if (!documents.count) {
     console.warn("No documents to build found");

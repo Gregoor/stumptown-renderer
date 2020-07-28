@@ -216,15 +216,7 @@ function BrokenLinks({
         {links.map((link, i) => {
           const key = `${link.href}${link.line}${link.column}`;
           return (
-            <li
-              key={key}
-              className={link.fixed ? "fixed" : undefined}
-              title={
-                link.fixed
-                  ? "This broken link has been automatically fixed."
-                  : undefined
-              }
-            >
+            <li key={key}>
               <code>{link.href}</code>{" "}
               {link.suggestion && (
                 <span>
@@ -358,21 +350,14 @@ function Macros({
     <div className="flaw flaw__macros">
       <h3>{humanizeFlawName("macros")}</h3>
       {messages.map((msg) => {
+        console.log("COMPARE", sourceFolder, msg.filepath);
         const inPrerequisiteMacro = !msg.filepath.includes(
           `${sourceFolder}/index.html`
         );
         const key = `${msg.filepath}:${msg.line}:${msg.column}`;
 
         return (
-          <details
-            key={key}
-            className={msg.fixed ? "fixed" : undefined}
-            title={
-              msg.fixed
-                ? "This macro flaw has been automatically fixed."
-                : undefined
-            }
-          >
+          <details key={key}>
             <summary>
               <a
                 href={`file://${msg.filepath}`}

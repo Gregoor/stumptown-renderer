@@ -13,7 +13,7 @@ const {
 } = require("./document-extractor");
 const SearchIndex = require("./search-index");
 const { addBreadcrumbData } = require("./document-utils");
-const { fixFixableFlaws, injectFlaws } = require("./flaws");
+const { injectFlaws } = require("./flaws");
 const cheerio = require("./monkeypatched-cheerio");
 const options = require("./build-options");
 
@@ -171,11 +171,7 @@ async function buildDocument(document) {
   doc.sidebarHTML = extractSidebar($);
 
   // With the sidebar out of the way, go ahead and check the rest
-  injectFlaws(doc, $, options, document);
-
-  // If fixFlaws is on and the doc has fixable flaws, this returned
-  // raw HTML string will be different.
-  fixFixableFlaws(doc, options, document);
+  injectFlaws(doc, $);
 
   // Post process HTML so that the right elements gets tagged so they
   // *don't* get translated by tools like Google Translate.

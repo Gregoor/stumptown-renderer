@@ -7,20 +7,14 @@ const {
   FILES,
   FOLDERSEARCH,
   NO_PROGRESSBAR,
-  FIX_FLAWS,
-  FIX_FLAWS_DRY_RUN,
-  FIX_FLAWS_VERBOSE,
 } = require("./constants");
 
-const options = Object.freeze({
+const options = {
   flawLevels: parseFlawLevels(DEFAULT_FLAW_LEVELS),
   files: parseFiles(FILES),
   folderSearch: parseFoldersearch(FOLDERSEARCH),
   noProgressbar: NO_PROGRESSBAR,
-  fixFlaws: FIX_FLAWS,
-  fixFlawsDryRun: FIX_FLAWS_DRY_RUN,
-  fixFlawsVerbose: FIX_FLAWS_VERBOSE,
-});
+};
 
 function parseFiles(filesStringList) {
   // The get-diff-action, which we use in the "PR Builds" CI,
@@ -45,7 +39,7 @@ function parseFiles(filesStringList) {
 function parseFoldersearch(searchpattern) {
   if (searchpattern) {
     // TODO: Consider turning it into a regex if there are * or $ or ^ in it
-    return searchpattern.toLowerCase();
+    return searchpattern;
   }
   return null;
 }

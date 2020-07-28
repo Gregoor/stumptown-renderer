@@ -1,6 +1,6 @@
 const { popularities } = require("content");
 
-const getPopularity = (item) => popularities[item.url] || 0;
+const getPopularity = (item) => popularities[item.url];
 
 module.exports = class SearchIndex {
   _itemsByLocale = {};
