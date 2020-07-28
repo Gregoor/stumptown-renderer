@@ -123,5 +123,6 @@ async function buildDocuments() {
 if (require.main === module) {
   buildDocuments().catch((error) => {
     console.error("error while building documents:", error);
+    process.exit(1);
   });
 }
