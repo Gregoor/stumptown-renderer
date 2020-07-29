@@ -99,7 +99,7 @@ app.get("/*", async (req, res) => {
     try {
       return res.send(await buildLiveSamplePageFromURL(req.url));
     } catch (e) {
-      return res.status(404).send(e.errorMessage || e.message);
+      return res.status(404).send(e.toString());
     }
   }
 

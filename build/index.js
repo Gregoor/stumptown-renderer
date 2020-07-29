@@ -245,7 +245,7 @@ async function buildLiveSamplePageFromURL(url) {
         sampleIDObject
       );
       if (liveSamplePage.flaw) {
-        throw liveSamplePage.flaw;
+        throw new Error(liveSamplePage.flaw.toString());
       }
       return liveSamplePage.html;
     }
