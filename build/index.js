@@ -229,7 +229,7 @@ async function buildLiveSamplePageFromURL(url) {
   const [documentURL, sampleID] = url.split("/_samples_/");
   const document = Document.findByURL(documentURL);
   if (!document) {
-    return `unable to find ${documentURL}`;
+    throw new Error(`No document found for ${documentURL}`);
   }
   // Convert the lower-case sampleID we extract from the incoming URL into
   // the actual sampleID object with the properly-cased live-sample ID.
@@ -245,12 +245,12 @@ async function buildLiveSamplePageFromURL(url) {
         sampleIDObject
       );
       if (liveSamplePage.flaw) {
-        return liveSamplePage.flaw.errorMessage;
+        throw liveSamplePage.flaw;
       }
       return liveSamplePage.html;
     }
   }
-  return `unable to find live-sample "${sampleID}" within ${documentURL}`;
+  throw new Error(`No live-sample "${sampleID}" found within ${documentURL}`);
 }
 
 module.exports = {
