@@ -1,4 +1,4 @@
-import "./index.scss";
+// import "./index.scss";
 
 type Variant = 0 | 1 | 2 | 3;
 
