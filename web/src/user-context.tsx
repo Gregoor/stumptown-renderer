@@ -39,6 +39,9 @@ const UserDataContext = React.createContext<UserData | null>(null);
 const SESSION_STORAGE_KEY = "whoami";
 
 function getSessionStorageData() {
+  if (!process.browser) {
+    return null;
+  }
   try {
     const data = sessionStorage.getItem(SESSION_STORAGE_KEY);
     if (data) {

@@ -26,16 +26,7 @@
 
 // The properties of this object will be globals in the macro
 // execution environment.
-const globalsPrototype = {
-  /**
-   * #### require(name)
-   *
-   * Load an npm package (the real "require" has its own cache).
-   *
-   * @type {NodeRequireFunction}
-   */
-  require,
-};
+const globalsPrototype = {};
 
 const kumaPrototype = require("./api/kuma.js");
 const mdnPrototype = require("./api/mdn.js");
@@ -139,6 +130,11 @@ class Environment {
     globals.page = globals.Page = freeze(page);
     globals.env = globals.Env = freeze(env);
     globals.info = freeze(info);
+    globals.packages = {
+      "mdn-data/css": require("mdn-data/css"),
+      "mdn-data/l10n/css": require("mdn-data/l10n/css"),
+      "@mdn/browser-compat-data": require("@mdn/browser-compat-data"),
+    };
     globals.renderPrerequisiteFromURL = renderPrerequisiteFromURL;
 
     // Macros use the global template() method to execute other
